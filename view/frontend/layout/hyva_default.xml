@@ -1,0 +1,51 @@
+<?xml version="1.0"?>
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <update handle="mercure_script" />
+    <body>
+        <referenceContainer name="before.body.end">
+            <block name="livechat.wrapper"
+                   class="Magento\Framework\View\Element\Template"
+                   template="MaxStan_LiveChat::chat/wrapper.phtml"
+            >
+                <block name="livechat.wrapper.header"
+                       class="Magento\Framework\View\Element\Template"
+                       template="MaxStan_LiveChat::chat/components/header.phtml" />
+
+                <container name="livechat.wrapper.layout" as="layout">
+                    <block name="livechat.wrapper.layout.welcome"
+                           class="Magento\Framework\View\Element\Template"
+                           template="MaxStan_LiveChat::chat/layout/welcome.phtml" />
+
+                    <block name="livechat.wrapper.layout.logged-in-welcome"
+                           class="Magento\Framework\View\Element\Template"
+                           template="MaxStan_LiveChat::chat/layout/logged-in-welcome.phtml" />
+
+                    <block name="livechat.wrapper.layout.conversation"
+                           class="Magento\Framework\View\Element\Template"
+                           template="MaxStan_LiveChat::chat/layout/conversation.phtml"
+                    >
+                        <block name="livechat.wrapper.layout.conversation.message"
+                               class="Magento\Framework\View\Element\Template"
+                               as="message"
+                               template="MaxStan_LiveChat::chat/components/message.phtml" />
+                    </block>
+                    <block name="livechat.wrapper.layout.main"
+                           class="Magento\Framework\View\Element\Template"
+                           template="MaxStan_LiveChat::chat/layout/main.phtml"
+                    >
+                        <block name="livechat.wrapper.layout.main.conversation-preview"
+                               class="Magento\Framework\View\Element\Template"
+                               as="conversation-preview"
+                               template="MaxStan_LiveChat::chat/components/conversation-preview.phtml" />
+                    </block>
+                </container>
+
+                <block name="livechat.wrapper.button"
+                       class="Magento\Framework\View\Element\Template"
+                       as="button"
+                       template="MaxStan_LiveChat::chat/components/button.phtml" />
+            </block>
+        </referenceContainer>
+    </body>
+</page>

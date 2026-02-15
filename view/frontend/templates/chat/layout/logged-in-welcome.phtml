@@ -1,0 +1,27 @@
+<?php
+
+declare(strict_types=1);
+
+use Hyva\Theme\Model\ViewModelRegistry;
+use Magento\Framework\Escaper;
+use Magento\Framework\View\Element\Template;
+
+/** @var Template $block */
+/** @var ViewModelRegistry $viewModels */
+/** @var Escaper $escaper */
+?>
+<template x-if="layout === 'logged-in-welcome'">
+    <div class="livechat-body">
+        <h2
+            id="livechat-title"
+            class="font-bold text-2xl"
+            x-html="'<span aria-hidden=\'true\'>👋</span> ' + hyva.str('<?= $escaper->escapeHtml(__('Hey, %1!')) ?>', customer.firstname)"
+        ></h2>
+        <p class="text-sm text-secondary text-center max-w-xs mt-1">
+            <?= $escaper->escapeHtml(__('You don\'t have an active chat at the moment. Click the button below to contact with our support team.')) ?>
+        </p>
+        <button class="btn btn-secondary mt-5" type="button" @click="layout = 'main'">
+            <?= $escaper->escapeHtml(__('Start Chat')) ?>
+        </button>
+    </div>
+</template>

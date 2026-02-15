@@ -1,0 +1,46 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <preference for="MaxStan\LiveChat\Api\Data\MessageInterface"
+                type="MaxStan\LiveChat\Model\Message" />
+    <preference for="MaxStan\LiveChat\Api\Data\ConversationInterface"
+                type="MaxStan\LiveChat\Model\Conversation" />
+    <preference for="MaxStan\LiveChat\Api\ConversationRepositoryInterface"
+                type="MaxStan\LiveChat\Model\ConversationRepository" />
+    <preference for="MaxStan\LiveChat\Api\MessageRepositoryInterface"
+                type="MaxStan\LiveChat\Model\MessageRepository" />
+    <preference for="MaxStan\LiveChat\Api\UserChatManagementInterface"
+                type="MaxStan\LiveChat\Model\UserChatManagement" />
+    <preference for="MaxStan\LiveChat\Api\Data\ConversationSearchResultsInterface"
+                type="MaxStan\LiveChat\Model\ConversationSearchResults" />
+    <preference for="MaxStan\LiveChat\Api\Data\MessageSearchResultsInterface"
+                type="MaxStan\LiveChat\Model\MessageSearchResults" />
+
+    <type name="MaxStan\Mercure\Model\MercureTopicsProvider">
+        <arguments>
+            <argument name="publishTopicResolvers" xsi:type="array">
+                <item name="conversation_message_index" xsi:type="object">MaxStan\LiveChat\Model\Topic\ConversationMessageResolver</item>
+            </argument>
+        </arguments>
+    </type>
+
+    <type name="Magento\Framework\View\Element\UiComponent\DataProvider\CollectionFactory">
+        <arguments>
+            <argument name="collections" xsi:type="array">
+                <item name="livechat_conversation_listing_data_source" xsi:type="string">MaxStan\LiveChat\Model\ResourceModel\Conversation\Grid\Collection</item>
+            </argument>
+        </arguments>
+    </type>
+
+    <type name="MaxStan\LiveChat\Model\ResourceModel\Conversation\Grid\Collection">
+        <arguments>
+            <argument name="mainTable" xsi:type="string">livechat_conversations</argument>
+            <argument name="eventPrefix" xsi:type="string">livechat_conversation_grid_collection</argument>
+            <argument name="eventObject" xsi:type="string">conversation_grid_collection</argument>
+            <argument name="resourceModel" xsi:type="string">MaxStan\LiveChat\Model\ResourceModel\Conversation</argument>
+        </arguments>
+    </type>
+
+    <preference for="MaxStan\LiveChat\Api\AdminChatManagementInterface"
+                type="MaxStan\LiveChat\Model\AdminChatManagement" />
+</config>

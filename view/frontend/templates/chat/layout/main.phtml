@@ -1,0 +1,34 @@
+<?php
+
+declare(strict_types=1);
+
+use Hyva\Theme\Model\ViewModelRegistry;
+use Hyva\Theme\ViewModel\HeroiconsOutline;
+use Magento\Framework\Escaper;
+use Magento\Framework\View\Element\Template;
+
+/** @var Template $block */
+/** @var ViewModelRegistry $viewModels */
+/** @var Escaper $escaper */
+/** @var HeroiconsOutline $heroicons */
+
+$heroicons = $viewModels->require(HeroiconsOutline::class);
+?>
+<template x-if="layout === 'main'">
+    <div class="flex flex-col h-full">
+        <div class="livechat-header">
+            <h2 id="livechat-title" x-data="{ phrase: phrases[Math.floor(Math.random() * phrases.length)] }">
+                <span aria-hidden="true" x-text="phrase.emoji"></span>
+                <span x-text="phrase.text"></span>
+            </h2>
+        </div>
+        <div class="livechat-body">
+            <?php // Please don't delete ul tag to keep user always scolled bottom?>
+            <ul aria-label="<?= $escaper->escapeHtmlAttr(__('Conversations')) ?>">
+                <template x-for="conversation in conversations" :key="conversation.id">
+                    <?= /** @noEscape */ $block->getChildHtml('conversation-preview') ?>
+                </template>
+            </ul>
+        </div>
+    </div>
+</template>

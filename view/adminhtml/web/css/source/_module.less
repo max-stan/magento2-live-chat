@@ -1,0 +1,140 @@
+//
+//  LiveChat Admin Styles
+//
+
+& when (@media-common = true) {
+
+    //
+    //  Conversation View
+    //  _____________________________________________
+
+    .livechat-admin-view {
+        .admin-livechat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 15px;
+            background: #f8f8f8;
+            border: 1px solid #ccc;
+            border-bottom: none;
+        }
+    }
+
+    //
+    //  Messages Container
+    //  _____________________________________________
+
+    .livechat-messages {
+        height: 500px;
+        overflow-y: auto;
+        border: 1px solid #ccc;
+        padding: 15px;
+        background: #fff;
+    }
+
+    .livechat-placeholder {
+        text-align: center;
+        padding: 20px;
+        color: #999;
+    }
+
+    //
+    //  Date Separator
+    //  _____________________________________________
+
+    .livechat-date-separator {
+        text-align: center;
+        margin: 16px 0;
+        position: relative;
+
+        &__label {
+            position: relative;
+            z-index: 1;
+            background: #fff;
+            padding: 0 8px;
+            color: #999;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        &__line {
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: #ddd;
+        }
+    }
+
+    //
+    //  Message Bubble
+    //  _____________________________________________
+
+    .livechat-message-row {
+        display: flex;
+        margin-bottom: 2px;
+    }
+
+    .livechat-bubble {
+        max-width: 70%;
+        padding: 8px 12px;
+        border-radius: 8px;
+        word-wrap: break-word;
+
+        &._customer {
+            background: #f5f5f5;
+        }
+
+        &._admin {
+            background: #e3f2fd;
+        }
+    }
+
+    .livechat-message-meta {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 4px;
+        margin-top: 2px;
+    }
+
+    .livechat-message-time {
+        font-size: 10px;
+        color: #999;
+    }
+
+    .livechat-tick {
+        font-size: 11px;
+
+        &._sent {
+            color: #999;
+        }
+
+        &._read {
+            color: #4caf50;
+            letter-spacing: -4px;
+        }
+    }
+
+    //
+    //  Reply Area
+    //  _____________________________________________
+
+    .livechat-reply {
+        border: 1px solid #ccc;
+        border-top: none;
+        padding: 10px;
+        background: #f8f8f8;
+        display: flex;
+        gap: 10px;
+
+        &__input {
+            flex: 1;
+            resize: none;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+    }
+}

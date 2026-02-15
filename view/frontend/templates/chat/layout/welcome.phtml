@@ -1,0 +1,29 @@
+<?php
+
+declare(strict_types=1);
+
+use Hyva\Theme\Model\ViewModelRegistry;
+use Magento\Framework\Escaper;
+use Magento\Framework\View\Element\Template;
+use MaxStan\LiveChat\ViewModel\CustomerUrl;
+
+/** @var Template $block */
+/** @var ViewModelRegistry $viewModels */
+/** @var Escaper $escaper */
+/** @var CustomerUrl $customerUrlViewModel */
+
+$customerUrlViewModel = $viewModels->require(CustomerUrl::class);
+?>
+<template x-if="layout === 'welcome'">
+    <div class="livechat-body">
+        <h2 id="livechat-title" class="font-bold text-2xl">
+            <span aria-hidden="true">👋</span> <?= $escaper->escapeHtml(__('Hello!')) ?>
+        </h2>
+        <p class="text-sm text-secondary text-center max-w-xs mt-1">
+            <?= $escaper->escapeHtml(__('Sign in to connect with us. Our support team is standing by to help you find what you need.')) ?>
+        </p>
+        <a class="btn btn-secondary mt-5" href="<?= $escaper->escapeUrl($customerUrlViewModel->getLoginUrl()) ?>">
+            <?= $escaper->escapeHtml(__('Sign In')) ?>
+        </a>
+    </div>
+</template>

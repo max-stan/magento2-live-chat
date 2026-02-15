@@ -1,0 +1,68 @@
+<?php
+
+declare(strict_types=1);
+
+use Hyva\Theme\Model\ViewModelRegistry;
+use Hyva\Theme\ViewModel\HeroiconsOutline;
+use Magento\Authorization\Model\UserContextInterface;
+use Magento\Framework\Escaper;
+use Magento\Framework\View\Element\Template;
+
+/** @var Template $block */
+/** @var ViewModelRegistry $viewModels */
+/** @var Escaper $escaper */
+/** @var HeroiconsOutline $heroicons */
+
+$heroicons = $viewModels->require(HeroiconsOutline::class);
+$tooltip = $escaper->escapeHtml(__('Recipient have opened the chat/read the message'));
+?>
+<li>
+    <template x-if="showDateSeparator(index)">
+        <div class="livechat-date-wrapper">
+            <time class="livechat-date" x-text="formatSeparatorDate(message.created_at)"></time>
+        </div>
+    </template>
+    <div
+        class="livechat-message-wrapper"
+        :class="{
+            'own': message.sender_type === <?= $escaper->escapeHtml(UserContextInterface::USER_TYPE_CUSTOMER) ?>,
+        }"
+    >
+        <div
+            class="livechat-message"
+            :class="{
+                'mt-0.5': currentConversation.messages[index - 1]
+                    && currentConversation.messages[index - 1].sender_type === message.sender_type
+                    && !showDateSeparator(index),
+                'mt-2.5': currentConversation.messages[index - 1]
+                    && currentConversation.messages[index - 1].sender_type !== message.sender_type
+                    && !showDateSeparator(index)
+            }"
+        >
+            <p x-text="message.text"></p>
+            <div class="livechat-message-details">
+                <time
+                    :datetime="message.created_at"
+                    x-text="formatMessageDate(message.created_at)"
+                ></time>
+                <div class="relative">
+                    <template x-if="!message.status">
+                        <span class="status">
+                            <span aria-hidden="true"><?= $heroicons->checkHtml('', 13, 13) ?></span>
+                            <span class="sr-only"><?= $escaper->escapeHtml(__('Sent')) ?></span>
+                        </span>
+                    </template>
+                    <template x-if="message.status === 'read'">
+                        <span class="status flex">
+                            <span aria-hidden="true" class="flex">
+                                <?= $heroicons->checkHtml('', 13, 13) ?>
+                                <?= $heroicons->checkHtml('absolute left-0.5', 13, 13) ?>
+                            </span>
+                            <span class="sr-only"><?= $escaper->escapeHtml(__('Read')) ?></span>
+                        </span>
+                    </template>
+                </div>
+            </div>
+        </div>
+    </div>
+</li>

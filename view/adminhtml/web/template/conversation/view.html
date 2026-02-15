@@ -1,0 +1,66 @@
+<div class="livechat-admin-view">
+    <div class="admin-livechat-header">
+        <a href="#" onclick="history.back(); return false;" class="action-back">&larr; Back to Conversations</a>
+    </div>
+
+    <div id="livechat-messages" class="livechat-messages">
+
+        <!-- ko if: isLoading -->
+        <div class="livechat-placeholder">Loading messages...</div>
+        <!-- /ko -->
+
+        <!-- ko ifnot: isLoading -->
+
+        <!-- ko if: messages.length === 0 -->
+        <div class="livechat-placeholder">No messages yet.</div>
+        <!-- /ko -->
+
+        <!-- ko foreach: { data: messages, as: 'message' } -->
+
+        <!-- ko if: $parent.showDateSeparator($index()) -->
+        <div class="livechat-date-separator">
+            <span class="livechat-date-separator__label"
+                  data-bind="text: $parent.formatSeparatorDate(message.created_at)"></span>
+            <div class="livechat-date-separator__line"></div>
+        </div>
+        <!-- /ko -->
+
+        <div class="livechat-message-row"
+             data-bind="style: {
+                 justifyContent: $parent.isAdminMessage(message) ? 'flex-end' : 'flex-start',
+                 marginTop: $index() > 0 && $parent.messages[$index() - 1].sender_type !== message.sender_type && !$parent.showDateSeparator($index()) ? '10px' : '0'
+             }">
+            <div class="livechat-bubble"
+                 data-bind="css: { '_admin': $parent.isAdminMessage(message), '_customer': !$parent.isAdminMessage(message) }">
+                <div data-bind="text: message.text"></div>
+                <div class="livechat-message-meta">
+                    <span class="livechat-message-time"
+                          data-bind="text: $parent.formatTime(message.created_at)"></span>
+                    <!-- ko if: $parent.isAdminMessage(message) -->
+                    <!-- ko ifnot: $parent.isRead(message) -->
+                    <span class="livechat-tick _sent" title="Sent">&#10003;</span>
+                    <!-- /ko -->
+                    <!-- ko if: $parent.isRead(message) -->
+                    <span class="livechat-tick _read" title="Read">&#10003;&#10003;</span>
+                    <!-- /ko -->
+                    <!-- /ko -->
+                </div>
+            </div>
+        </div>
+        <!-- /ko -->
+
+        <!-- /ko -->
+    </div>
+
+    <div class="livechat-reply">
+        <textarea rows="2"
+                  class="livechat-reply__input"
+                  placeholder="Type your reply..."
+                  data-bind="value: messageText, valueUpdate: 'input', event: { keydown: handleKeydown }"></textarea>
+        <button class="action-primary"
+                type="button"
+                data-bind="click: sendMessage, enable: messageText.trim().length > 0 && !isSending">
+            <span data-bind="text: isSending ? 'Sending...' : 'Send'"></span>
+        </button>
+    </div>
+</div>

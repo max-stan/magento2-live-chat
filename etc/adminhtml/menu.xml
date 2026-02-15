@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Backend:etc/menu.xsd">
+    <menu>
+        <add id="MaxStan_LiveChat::livechat"
+             title="Live Chat"
+             translate="title"
+             module="MaxStan_LiveChat"
+             sortOrder="100"
+             parent="Magento_Backend::content"
+             resource="MaxStan_LiveChat::livechat" />
+        <add id="MaxStan_LiveChat::livechat_conversations"
+             title="Conversations"
+             translate="title"
+             module="MaxStan_LiveChat"
+             sortOrder="10"
+             parent="MaxStan_LiveChat::livechat"
+             action="livechat/conversation"
+             resource="MaxStan_LiveChat::livechat_manage" />
+    </menu>
+</config>

@@ -1,0 +1,76 @@
+.livechat-wrapper {
+    @apply fixed bottom-5 right-5 flex flex-col justify-end gap-3;
+    @apply max-w-sm max-h-[calc(100%-2.5rem)] h-[600px] w-full z-10 rounded-lg;
+
+    .livechat {
+        @apply flex-grow shadow-lg flex flex-col min-h-0 rounded-lg bg-white;
+        @apply border-2 border-secondary;
+    }
+
+    #livechat-trigger {
+        /* order-last allows us to focus on the "Chat" button when we close popup using Esc key */
+        @apply btn btn-primary p-3 rounded-xl w-fit self-end shadow-lg order-last;
+    }
+
+    .livechat-header {
+        @apply w-full p-2 text-lg font-bold bg-white text-black text-center flex gap-3;
+        @apply bg-secondary;
+    }
+
+    .layout-main {
+        .livechat-header {
+            @apply justify-center;
+        }
+    }
+
+    .livechat-body {
+        @apply bg-white w-full h-full rounded-b-lg;
+    }
+
+    .layout-welcome, .layout-logged-in-welcome {
+        .livechat-body {
+            @apply flex flex-col justify-center items-center rounded-lg;
+        }
+    }
+
+    .livechat-footer {
+        @apply rounded-bl-lg rounded-br-lg;
+    }
+
+    .layout-conversation {
+        .livechat-body {
+            @apply overflow-y-auto px-2.5 py-3.5 flex flex-col-reverse;
+        }
+
+        .livechat-message-wrapper {
+            @apply flex;
+
+            &.own {
+                @apply justify-end;
+
+                .livechat-message {
+                    @apply bg-primary text-white;
+                }
+            }
+        }
+
+        .livechat-message {
+            @apply bg-gray-200 rounded-lg p-2;
+            @apply max-w-[calc(100%-1rem)];
+        }
+
+        .livechat-message-details {
+            @apply flex flex-row items-center justify-end gap-0.5 text-xs;
+        }
+    }
+
+    .livechat-date-wrapper {
+        @apply w-full flex justify-center relative mx-auto my-3;
+        @apply before:content-[''] before:bg-gray-500 before:w-full before:h-[1px];
+        @apply before:top-1/2 before:left-0 before:absolute;
+
+        .livechat-date {
+            @apply relative px-1 bg-white text-gray-500 font-medium;
+        }
+    }
+}

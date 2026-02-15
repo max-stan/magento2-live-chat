@@ -1,0 +1,73 @@
+<?php
+
+declare(strict_types=1);
+
+use Hyva\Theme\Model\ViewModelRegistry;
+use Hyva\Theme\ViewModel\HeroiconsOutline;
+use Magento\Framework\Escaper;
+use Magento\Framework\View\Element\Template;
+
+/** @var Template $block */
+/** @var ViewModelRegistry $viewModels */
+/** @var Escaper $escaper */
+/** @var HeroiconsOutline $heroicons */
+
+$heroicons = $viewModels->require(HeroiconsOutline::class);
+?>
+<template x-if="layout === 'conversation'">
+    <div class="flex flex-col h-full">
+        <div class="livechat-header">
+            <button
+                aria-label="<?= $escaper->escapeHtmlAttr(__('Back to conversations')) ?>"
+                @click="
+                    layout = 'main';
+                    currentConversation = null;
+                "
+            >
+                <span aria-hidden="true"><?= $heroicons->arrowLeftHtml() ?></span>
+            </button>
+            <h2 id="livechat-title" x-html="formatConversationTitle(currentConversation.created_at)"></h2>
+        </div>
+        <div class="livechat-body">
+            <?php // Please don't delete ul tag to keep user always scolled bottom?>
+            <ul x-ref="messagesContainer" role="log" aria-label="<?= $escaper->escapeHtmlAttr(__('Chat messages')) ?>">
+                <template x-for="(message, index) in currentConversation.messages" :key="message.id">
+                        <?= /** @noEscape */ $block->getChildHtml('message-date') ?>
+                    <?= /** @noEscape */ $block->getChildHtml('message') ?>
+                </template>
+            </ul>
+        </div>
+        <div class="livechat-footer p-4 bg-gray-100" :aria-busy="isLoading">
+            <form
+                class="flex gap-2"
+                method="POST"
+                @submit.prevent="sendMessage"
+            >
+                <label class="sr-only" for="livechat-message">
+                    <?= $escaper->escapeHtml(__('Message')) ?>
+                </label>
+                <input
+                    type="text"
+                    id="livechat-message"
+                    class="form-input w-full"
+                    name="message"
+                    x-model="message"
+                    required
+                    placeholder="<?= $escaper->escapeHtmlAttr(__('Type message here...')) ?>"
+                    aria-describedby="livechat-send-hint"
+                />
+                <button
+                    class="btn btn-primary p-2.5"
+                    type="submit"
+                    :disabled="!isSendAllowed()"
+                    aria-label="<?= $escaper->escapeHtmlAttr(__('Send message')) ?>"
+                >
+                    <span aria-hidden="true"><?= $heroicons->paperAirplaneHtml('rotate-90') ?></span>
+                </button>
+                <span id="livechat-send-hint" class="sr-only">
+                    <?= $escaper->escapeHtml(__('Press Enter to send')) ?>
+                </span>
+            </form>
+        </div>
+    </div>
+</template>

@@ -1,0 +1,257 @@
+<?php
+
+declare(strict_types=1);
+
+use Hyva\Theme\Model\ViewModelRegistry;
+use Hyva\Theme\ViewModel\Customer;
+use Magento\Authorization\Model\UserContextInterface;
+use Magento\Framework\Escaper;
+use Magento\Framework\View\Element\Template;
+
+/** @var Template $block */
+/** @var ViewModelRegistry $viewModels */
+/** @var Escaper $escaper */
+/** @var Customer $customerViewModel */
+
+$customerViewModel = $viewModels->require(Customer::class);
+?>
+<div
+    class="livechat-wrapper"
+    x-data="initLiveChat()"
+    x-bind="eventListeners"
+    @keyup.escape="open = false"
+    @click.outside="open = false"
+>
+    <?= /** @noEscape */ $block->getChildHtml('button') ?>
+
+    <div
+        x-show="open"
+        x-cloak
+        class="livechat"
+        :class='{ ["layout-" + layout]: true }'
+        x-transition
+        role="dialog"
+        aria-labelledby="livechat-title"
+    >
+        <?= /** @noEscape */ $block->getChildHtml('layout') ?>
+    </div>
+</div>
+<script>
+    "use strict";
+
+    function initLiveChat() {
+        return {
+            port: null,
+            open: false,
+            isLoading: false,
+            layout: '<?= $escaper->escapeHtml($customerViewModel->customerLoggedIn() ? 'logged-in-welcome' : 'welcome') ?>',
+            customer: {},
+            message: null,
+            currentConversation: null,
+            conversations: null,
+            conversationTitleDateFormatter: null,
+            messageDateFormatter: null,
+            lastMessageDateFormatter: null,
+            separatorDateFormatter: null,
+            phrases: [
+                { emoji: '🤝', text: '<?= $escaper->escapeJs(__('Not sure? Let\'s figure it out together')) ?>' },
+                { emoji: '❓', text: '<?= $escaper->escapeJs(__('Got questions? We\'ve got answers')) ?>' },
+                { emoji: '😊', text: '<?= $escaper->escapeJs(__('Need help choosing? Ask our team')) ?>' },
+                { emoji: '🙌', text: '<?= $escaper->escapeJs(__('Our experts are ready to help you')) ?>' },
+                { emoji: '👋', text: '<?= $escaper->escapeJs(__('Real people, real answers. Let\'s talk!')) ?>' },
+                { emoji: '🎯', text: '<?= $escaper->escapeJs(__('Don\'t guess — ask us anything')) ?>' },
+                { emoji: '👌', text: '<?= $escaper->escapeJs(__('We\'ll help you find the right fit')) ?>' },
+                { emoji: '🔍', text: '<?= $escaper->escapeJs(__('Curious about something? Chat with us')) ?>' },
+                { emoji: '🛍️', text: '<?= $escaper->escapeJs(__('One chat away from the perfect pick')) ?>' },
+                { emoji: '⚡', text: '<?= $escaper->escapeJs(__('Let us save you time. Start a chat!')) ?>' },
+            ],
+
+            init() {
+                this.initSharedWorker();
+                this.initConversations();
+            },
+
+            async initConversations() {
+                const response = await fetch(`${BASE_URL}rest/${CURRENT_STORE_CODE}/V1/conversations/mine`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                });
+
+                if (!response.ok) {
+                    console.error('Error during fetch all customer conversations')
+                    return;
+                }
+
+                this.conversations = await response.json();
+                this.layout = this.conversations ? 'main' : this.layout;
+                this.port.postMessage({
+                    type: 'subscribe',
+                    topics: this.conversations.map(({ id }) => id)
+                })
+            },
+
+            initSharedWorker() {
+                const worker = new SharedWorker('<?= $block->getViewFileUrl('MaxStan_LiveChat::js/chat-worker.js') ?>');
+                this.port = worker.port;
+                this.port.addEventListener('message', (event) => {
+                    const { data: message } = event;
+                    if (!message?.type) {
+                        return;
+                    }
+
+                    const func = this.handlers[message.type].bind(this);
+                    func(message.data);
+                });
+                this.port.start();
+            },
+
+            async sendMessage() {
+                if (!this.message) {
+                    return;
+                }
+
+                const { id: conversationId } = this.currentConversation;
+                this.isLoading = true;
+
+                const response = await fetch(
+                    `${BASE_URL}rest/${CURRENT_STORE_CODE}/V1/conversation/${conversationId}/message`,
+                    {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest'
+                        },
+                        body: JSON.stringify({
+                            text: this.message
+                        })
+                    }
+                );
+
+                this.isLoading = false;
+                if (!response.ok) {
+                    console.error('Error during fetch all customer conversations')
+                    return;
+                }
+
+                this.message = null;
+            },
+
+            isSendAllowed() {
+                return !!this.message && !this.isLoading;
+            },
+
+            showDateSeparator(index) {
+                const current = new Date(this.currentConversation.messages[index].created_at + ' UTC').toDateString();
+                if (index === 0) {
+                    return true;
+                }
+
+                const previous = new Date(this.currentConversation.messages[index - 1].created_at + ' UTC').toDateString();
+
+                return current !== previous;
+            },
+
+            formatSeparatorDate(date) {
+                if (!this.separatorDateFormatter) {
+                    this.separatorDateFormatter = new Intl.DateTimeFormat('en-US', {
+                        month: 'long',
+                        day: 'numeric'
+                    });
+                }
+
+                return this.separatorDateFormatter.format(new Date(date + ' UTC'))
+            },
+
+            formatMessageDate(date) {
+                if (!this.messageDateFormatter) {
+                    this.messageDateFormatter = new Intl.DateTimeFormat('en-US', {
+                        hour: 'numeric',
+                        minute: '2-digit',
+                        hour12: true
+                    });
+                }
+
+                return this.messageDateFormatter.format(new Date(date + ' UTC'))
+            },
+
+            formatConversationTitle(date) {
+                if (!this.conversationTitleDateFormatter) {
+                    this.conversationTitleDateFormatter = new Intl.DateTimeFormat(
+                        'en',
+                        { dateStyle: 'medium', timeStyle: 'short' }
+                    );
+                }
+
+                return '<span aria-hidden="true">💬</span> <?= $escaper->escapeHtml(__('Started')) ?> '
+                    + this.conversationTitleDateFormatter.format(new Date(date + ' UTC'));
+            },
+
+            formatLastMessageDate(conversation) {
+                const date = conversation.messages.at(-1).created_at;
+                if (!date) {
+                    return '';
+                }
+
+                if (!this.lastMessageDateFormatter) {
+                    this.lastMessageDateFormatter = new Intl.RelativeTimeFormat("en", { numeric: "auto", style: "narrow" });
+                }
+
+                const secondsDiff = Math.round((new Date(date + ' UTC') - Date.now()) / 1000);
+                const unitsInSec = [60, 3600, 86400, 86400 * 7, 86400 * 30, 86400 * 365, Infinity],
+                    unitStrings = ["second", "minute", "hour", "day", "week", "month", "year"],
+                    unitIndex = unitsInSec.findIndex((cutoff) => cutoff > Math.abs(secondsDiff));
+
+                const divisor = unitIndex ? unitsInSec[unitIndex - 1] : 1;
+                return this.lastMessageDateFormatter.format(
+                    Math.floor(secondsDiff / divisor),
+                    unitStrings[unitIndex]
+                );
+            },
+
+            formatConversationMessagePreview(conversation) {
+                const message = conversation.messages.at(-1);
+
+                return hyva.str(
+                    '%1: %2',
+                    message.sender_type === <?= $escaper->escapeHtml(UserContextInterface::USER_TYPE_CUSTOMER) ?>
+                        ? '<?= $escaper->escapeHtml(__('You')) ?>'
+                        : message.sender_name,
+                    message.text
+                );
+            },
+
+            getConversationLabel(conversation) {
+                return this.formatConversationTitle(conversation.created_at).replace(/<[^>]*>/g, '')
+                    + '. '
+                    + this.formatConversationMessagePreview(conversation);
+            },
+
+            handlers: {
+                ['message:received'](data) {
+                    const { conversation_id: conversationId } = data;
+
+                    this.conversations.find(({ id }) => id === conversationId)
+                        ?.messages.push(data);
+                },
+            },
+
+            eventListeners: {
+                ['@private-content-loaded.window'](event) {
+                    const { customer = {} } = event.detail.data;
+                    this.customer = customer;
+                },
+
+                // ['@mercure:message.window'](event) {
+                //     const { type, data } = event.detail;
+                //
+                //     switch (type) {
+                //         case 'message:received': this.handleMessageUpdate(data)
+                //     }
+                // }
+            },
+        }
+    }
+</script>

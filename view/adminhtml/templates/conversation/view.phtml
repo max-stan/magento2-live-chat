@@ -1,0 +1,34 @@
+<?php
+
+declare(strict_types=1);
+
+/** @var Template $block */
+/** @var Escaper $escaper */
+
+use Magento\Backend\Block\Template;
+use Magento\Framework\Escaper;
+
+$conversationId = (int)$block->getRequest()->getParam('id');
+?>
+<div id="livechat-conversation-view" data-bind="scope: 'livechat-conversation-view'">
+    <!-- ko template: getTemplate() --><!-- /ko -->
+</div>
+
+<script type="text/x-magento-init">
+{
+    "#livechat-conversation-view": {
+        "Magento_Ui/js/core/app": {
+            "components": {
+                "livechat-conversation-view": {
+                    "component": "MaxStan_LiveChat/js/conversation-view",
+                    "template": "MaxStan_LiveChat/conversation/view",
+                    "conversationId": <?= $conversationId ?>,
+                    "mercureUrl": "<?= $escaper->escapeUrl($block->getBaseUrl()) ?>.well-known/mercure",
+                    "messagesUrl": "<?= $escaper->escapeUrl($block->getUrl('livechat/conversation/messages')) ?>",
+                    "sendMessageUrl": "<?= $escaper->escapeUrl($block->getUrl('livechat/conversation/sendMessage')) ?>"
+                }
+            }
+        }
+    }
+}
+</script>

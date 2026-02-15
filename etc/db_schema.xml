@@ -1,0 +1,47 @@
+<?xml version="1.0"?>
+<schema xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:Setup/Declaration/Schema/etc/schema.xsd"
+>
+    <table name="livechat_messages" engine="innodb" comment="Magento Asset Table">
+        <column xsi:type="int" name="id" unsigned="true" identity="true" nullable="false" comment="Identifier" />
+        <column xsi:type="int" name="conversation_id" unsigned="true" nullable="false" comment="Conversation ID" />
+        <column xsi:type="int" name="sender_id" unsigned="true" nullable="false" comment="Sender ID" />
+        <column xsi:type="text" name="text" nullable="false" comment="Text" />
+        <column xsi:type="smallint" name="status" nullable="false" default="0" comment="Status (e.g read)" />
+        <column xsi:type="datetime" name="created_at" default="CURRENT_TIMESTAMP" on_update="false" nullable="false"
+                comment="Created At" />
+
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="id" />
+        </constraint>
+
+        <index referenceId="LIVECHAT_MESSAGES_SENDER_ID" indexType="btree">
+            <column name="sender_id" />
+        </index>
+
+        <constraint xsi:type="foreign" referenceId="LIVECHAT_MESSAGES_CONVERSATION_ID_LIVECHAT_CONVERSATIONS_ID"
+                    table="livechat_messages" column="conversation_id"
+                    referenceTable="livechat_conversations" referenceColumn="id"
+                    onDelete="CASCADE" />
+    </table>
+
+    <table name="livechat_conversations" engine="innodb" comment="Magento Asset Table">
+        <column xsi:type="int" name="id" unsigned="true" identity="true" nullable="false" comment="Identifier" />
+        <column xsi:type="int" name="user_id" unsigned="true" nullable="false" comment="User ID" />
+        <column xsi:type="int" name="admin_id" unsigned="true" nullable="true" comment="Admin ID" />
+        <column xsi:type="datetime" name="created_at" default="CURRENT_TIMESTAMP" on_update="false" nullable="false" comment="Created At" />
+
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="id" />
+        </constraint>
+
+        <constraint xsi:type="foreign" referenceId="LIVECHAT_MESSAGES_USER_ID_CUSTOMER_ENTITY_ENTITY_ID"
+                    table="livechat_messages" column="user_id"
+                    referenceTable="customer_entity" referenceColumn="entity_id"
+                    onDelete="CASCADE" />
+        <constraint xsi:type="foreign" referenceId="LIVECHAT_MESSAGES_USER_ID_ADMIN_USER_USER_ID"
+                    table="livechat_messages" column="admin_id"
+                    referenceTable="admin_user" referenceColumn="user_id"
+                    onDelete="CASCADE" />
+    </table>
+</schema>

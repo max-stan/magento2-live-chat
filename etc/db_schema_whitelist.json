@@ -1,0 +1,32 @@
+{
+    "livechat_messages": {
+        "column": {
+            "id": true,
+            "conversation_id": true,
+            "sender_id": true,
+            "text": true,
+            "status": true,
+            "created_at": true
+        },
+        "index": {
+            "LIVECHAT_MESSAGES_SENDER_ID": true
+        },
+        "constraint": {
+            "PRIMARY": true,
+            "LIVECHAT_MESSAGES_CONVERSATION_ID_LIVECHAT_CONVERSATIONS_ID": true
+        }
+    },
+    "livechat_conversations": {
+        "column": {
+            "id": true,
+            "user_id": true,
+            "admin_id": true,
+            "created_at": true
+        },
+        "constraint": {
+            "PRIMARY": true,
+            "LIVECHAT_CONVERSATIONS_USER_ID_CUSTOMER_ENTITY_ENTITY_ID": true,
+            "LIVECHAT_CONVERSATIONS_USER_ID_ADMIN_USER_USER_ID": true
+        }
+    }
+}

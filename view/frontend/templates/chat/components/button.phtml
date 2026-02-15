@@ -1,0 +1,33 @@
+<?php
+
+declare(strict_types=1);
+
+use Hyva\Theme\Model\ViewModelRegistry;
+use Hyva\Theme\ViewModel\HeroiconsOutline;
+use Magento\Framework\Escaper;
+use Magento\Framework\View\Element\Template;
+
+/** @var Template $block */
+/** @var ViewModelRegistry $viewModels */
+/** @var Escaper $escaper */
+/** @var HeroiconsOutline $heroicons */
+
+$heroicons = $viewModels->require(HeroiconsOutline::class);
+$attributes = ['title' => __('')];
+?>
+<button
+    id="livechat-trigger"
+    type="button"
+    :title="!open ? '<?= $escaper->escapeHtml(__('Click to open')) ?>' : '<?= $escaper->escapeHtml(__('Click to close')) ?>'"
+    aria-label="<?= $escaper->escapeHtml(__('Live Chat')) ?>"
+    aria-haspopup="dialog"
+    :aria-expanded="open"
+    @click="open = !open"
+>
+    <span x-show="!open" aria-hidden="true">
+        <?= $heroicons->chatHtml('', 36, 36, $attributes) ?>
+    </span>
+    <span x-show="open" x-cloak aria-hidden="true">
+        <?= $heroicons->xHtml('', 36, 36, $attributes) ?>
+    </span>
+</button>
