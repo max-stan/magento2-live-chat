@@ -20,7 +20,7 @@ use Magento\Framework\View\Element\Template;
         <p class="text-sm text-secondary text-center max-w-xs mt-1">
             <?= $escaper->escapeHtml(__('You don\'t have an active chat at the moment. Click the button below to contact with our support team.')) ?>
         </p>
-        <button class="btn btn-secondary mt-5" type="button" @click="layout = 'main'">
+        <button class="btn btn-secondary mt-5" type="button" @click="startNewConversation()" :disabled="isLoading">
             <?= $escaper->escapeHtml(__('Start Chat')) ?>
         </button>
     </div>

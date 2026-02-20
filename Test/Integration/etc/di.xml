@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <preference for="MaxStan\Mercure\Api\MercureTopicPublisherInterface"
+                type="MaxStan\LiveChat\Test\Integration\Mock\MercureTopicPublisherSpy" />
+    <preference for="MaxStan\Mercure\Service\MercureTopicPublisher"
+                type="MaxStan\LiveChat\Test\Integration\Mock\MercureTopicPublisherSpy" />
+    <preference for="MaxStan\Mercure\Api\MercureHubInterface"
+                type="MaxStan\LiveChat\Test\Integration\Mock\MercureHubStub" />
+</config>

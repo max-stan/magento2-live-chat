@@ -11,7 +11,6 @@ interface MessageInterface
     public const string TEXT = "text";
     public const string STATUS = "status";
     public const string CREATED_AT = "created_at";
-    public const string OWN = "own";
 
     /**
      * @return int

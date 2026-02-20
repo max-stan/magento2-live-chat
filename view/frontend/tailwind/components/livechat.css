@@ -21,6 +21,10 @@
         .livechat-header {
             @apply justify-center;
         }
+
+        .livechat-body {
+            @apply overflow-y-auto;
+        }
     }
 
     .livechat-body {

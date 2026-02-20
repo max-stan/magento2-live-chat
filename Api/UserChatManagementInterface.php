@@ -11,6 +11,7 @@ use Magento\Framework\Stdlib\Cookie\CookieSizeLimitReachedException;
 use Magento\Framework\Stdlib\Cookie\FailureToSendException;
 use MaxStan\LiveChat\Api\Data\MessageInterface;
 use MaxStan\LiveChat\Api\Data\PublicMessageInterface;
+use MaxStan\LiveChat\Model\Conversation;
 use MaxStan\LiveChat\Model\Message;
 
 interface UserChatManagementInterface
@@ -45,4 +46,11 @@ interface UserChatManagementInterface
      * @throws InputException
      */
     public function getConversations(): array;
+
+    /**
+     * @return \MaxStan\LiveChat\Api\Data\PublicConversationInterface
+     *
+     * @throws LocalizedException
+     */
+    public function createConversation(): Conversation;
 }
