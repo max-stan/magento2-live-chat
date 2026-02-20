@@ -20,7 +20,6 @@
         "column": {
             "id": true,
             "user_id": true,
-            "admin_id": true,
             "created_at": true
         },
         "constraint": {

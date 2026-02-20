@@ -57,12 +57,6 @@ class Collection extends ConversationCollection implements SearchResultInterface
             ]
         );
 
-        $this->getSelect()->columns([
-            'status' => new \Magento\Framework\DB\Sql\Expression(
-                'IF(main_table.admin_id IS NOT NULL, 1, 0)'
-            )
-        ]);
-
         $this->getSelect()->group('main_table.id');
 
         return $this;

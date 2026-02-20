@@ -9,6 +9,15 @@
     //  _____________________________________________
 
     .livechat-admin-view {
+        display: flex;
+        flex-direction: column;
+        height: calc(100vh - 200px);
+        min-height: 300px;
+        max-width: 1024px;
+        max-height: 600px;
+        margin-left: auto;
+        margin-right: auto;
+
         .admin-livechat-header {
             display: flex;
             justify-content: space-between;
@@ -17,6 +26,7 @@
             background: #f8f8f8;
             border: 1px solid #ccc;
             border-bottom: none;
+            flex-shrink: 0;
         }
     }
 
@@ -25,7 +35,8 @@
     //  _____________________________________________
 
     .livechat-messages {
-        height: 500px;
+        flex: 1;
+        min-height: 0;
         overflow-y: auto;
         border: 1px solid #ccc;
         padding: 15px;
@@ -128,6 +139,7 @@
         background: #f8f8f8;
         display: flex;
         gap: 10px;
+        flex-shrink: 0;
 
         &__input {
             flex: 1;

@@ -7,7 +7,6 @@ interface ConversationInterface
 {
     public const string ID = "id";
     public const string USER_ID = "user_id";
-    public const string ADMIN_ID = "admin_id";
     public const string CREATED_AT = "created_at";
 
     /**
@@ -31,17 +30,6 @@ interface ConversationInterface
      * @return \MaxStan\LiveChat\Api\Data\ConversationInterface
      */
     public function setUserId(int $userId): ConversationInterface;
-
-    /**
-     * @return int|null
-     */
-    public function getAdminId(): ?int;
-
-    /**
-     * @param int|null $adminId
-     * @return \MaxStan\LiveChat\Api\Data\ConversationInterface
-     */
-    public function setAdminId(?int $adminId): ConversationInterface;
 
     /**
      * @return string

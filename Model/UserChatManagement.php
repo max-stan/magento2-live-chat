@@ -18,6 +18,7 @@ use Magento\User\Model\UserFactory as AdminUserFactory;
 use MaxStan\LiveChat\Api\ConversationRepositoryInterface;
 use MaxStan\LiveChat\Api\Data\ConversationInterface;
 use MaxStan\LiveChat\Api\Data\MessageInterface;
+use MaxStan\LiveChat\Api\Data\ConversationInterfaceFactory;
 use MaxStan\LiveChat\Api\Data\MessageInterfaceFactory;
 use MaxStan\LiveChat\Api\MessageRepositoryInterface;
 use MaxStan\LiveChat\Api\UserChatManagementInterface;
@@ -36,6 +37,7 @@ readonly class UserChatManagement implements UserChatManagementInterface
         private SearchCriteriaBuilder $searchCriteriaBuilder,
         private MessageRepositoryInterface $messageRepository,
         private SortOrderBuilder $sortOrderBuilder,
+        private ConversationInterfaceFactory $conversationFactory,
         private MessageInterfaceFactory $messageFactory,
         private CustomerRepositoryInterface $customerRepository,
         private AdminUserFactory $adminUserFactory,
@@ -107,13 +109,10 @@ readonly class UserChatManagement implements UserChatManagementInterface
         $map = [];
         $userId = $conversation->getUserId();
         $map[$userId] = $this->getCustomerName($userId);
-        if ($conversation->getAdminId()) {
-            $map[$conversation->getAdminId()] = $this->getAdminName($conversation->getAdminId());
-        }
 
         foreach ($messages as $message) {
             $senderId = $message->getSenderId();
-            $message->setData('sender_name', $map[$senderId] ?? (string)__('Unknown'));
+            $message->setData('sender_name', $map[$senderId] ?? (string)__('Admin'));
             $message->setData(
                 'sender_type',
                 $senderId === $userId
@@ -151,6 +150,51 @@ readonly class UserChatManagement implements UserChatManagementInterface
         return $conversations;
     }
 
+    /**
+     * @inheritDoc
+     */
+    public function createConversation(): Conversation
+    {
+        $customerId = $this->getUserId();
+
+        if (!$customerId) {
+            throw new AuthorizationException(
+                __('You are not authorized for requested resource.')
+            );
+        }
+
+        $searchCriteria = $this->searchCriteriaBuilder
+            ->addFilter(ConversationInterface::USER_ID, $customerId)
+            ->create();
+        $count = $this->conversationRepository->getList($searchCriteria)->getTotalCount();
+
+        if ($count >= self::CONVERSATIONS_LIMIT) {
+            throw new LocalizedException(
+                __('You have reached the maximum of %1 conversations.', self::CONVERSATIONS_LIMIT)
+            );
+        }
+
+        $createdAt = new DateTime('', new DateTimeZone('UTC'));
+
+        /** @var Conversation $conversation */
+        $conversation = $this->conversationFactory->create();
+        $conversation->setUserId($customerId)
+            ->setCreatedAt($createdAt->format('Y-m-d H:i:s'));
+
+        try {
+            $this->conversationRepository->save($conversation);
+        } catch (CouldNotSaveException) {
+            throw new LocalizedException(
+                __('Something went wrong while creating conversation.')
+            );
+        }
+
+        $conversation->setData('messages', []);
+        $this->mercureHub->setAuthorizationHeader();
+
+        return $conversation;
+    }
+
     private function getCustomerName(int $customerId): string
     {
         try {
@@ -180,18 +224,22 @@ readonly class UserChatManagement implements UserChatManagementInterface
     {
         $customerId = $this->getUserId();
         $conversation = $this->conversationRepository->getById($conversationId);
-        $userTypes = [UserContextInterface::USER_TYPE_ADMIN, UserContextInterface::USER_TYPE_CUSTOMER];
+        $userType = $this->userContext->getUserType();
         if (
-            !$customerId
-            || !in_array($customerId, [$conversation->getUserId(), $conversation->getAdminId()])
-            || !in_array($this->userContext->getUserType(), $userTypes)
+            $userType === UserContextInterface::USER_TYPE_CUSTOMER
+            && $customerId
+            && $conversation->getUserId() === $customerId
         ) {
-            throw new AuthorizationException(
-                __('You are not authorized for requested resource.')
-            );
+            return $conversation;
         }
 
-        return $conversation;
+        if ($userType === UserContextInterface::USER_TYPE_ADMIN) {
+            return $conversation;
+        }
+
+        throw new AuthorizationException(
+            __('You are not authorized for requested resource.')
+        );
     }
 
     private function getUserId(): int

@@ -42,19 +42,6 @@ class Conversation extends AbstractModel implements ConversationInterface
         return $this;
     }
 
-    public function getAdminId(): ?int
-    {
-        return $this->getData(self::ADMIN_ID) === null ? null
-            : (int)$this->getData(self::ADMIN_ID);
-    }
-
-    public function setAdminId(?int $adminId): ConversationInterface
-    {
-        $this->setData(self::ADMIN_ID, $adminId);
-
-        return $this;
-    }
-
     public function getCreatedAt(): string
     {
         return (string)$this->getData(self::CREATED_AT);

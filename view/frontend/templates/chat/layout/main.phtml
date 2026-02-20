@@ -30,5 +30,16 @@ $heroicons = $viewModels->require(HeroiconsOutline::class);
                 </template>
             </ul>
         </div>
+        <div class="livechat-footer p-4 bg-gray-100">
+            <button
+                type="button"
+                class="btn btn-secondary w-full"
+                @click="startNewConversation()"
+                :disabled="isLoading || conversations.length >= 10"
+            >
+                <span aria-hidden="true"><?= $heroicons->pencilHtml('w-5 h-5 inline') ?></span>
+                <?= $escaper->escapeHtml(__('New Conversation')) ?>
+            </button>
+        </div>
     </div>
 </template>

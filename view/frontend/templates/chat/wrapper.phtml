@@ -61,7 +61,7 @@ $customerViewModel = $viewModels->require(Customer::class);
                 { emoji: '👋', text: '<?= $escaper->escapeJs(__('Real people, real answers. Let\'s talk!')) ?>' },
                 { emoji: '🎯', text: '<?= $escaper->escapeJs(__('Don\'t guess — ask us anything')) ?>' },
                 { emoji: '👌', text: '<?= $escaper->escapeJs(__('We\'ll help you find the right fit')) ?>' },
-                { emoji: '🔍', text: '<?= $escaper->escapeJs(__('Curious about something? Chat with us')) ?>' },
+                { emoji: '🔍', text: '<?= $escaper->escapeJs(__('Curious about something? Let\'s chat')) ?>' },
                 { emoji: '🛍️', text: '<?= $escaper->escapeJs(__('One chat away from the perfect pick')) ?>' },
                 { emoji: '⚡', text: '<?= $escaper->escapeJs(__('Let us save you time. Start a chat!')) ?>' },
             ],
@@ -86,7 +86,8 @@ $customerViewModel = $viewModels->require(Customer::class);
                 }
 
                 this.conversations = await response.json();
-                this.layout = this.conversations ? 'main' : this.layout;
+                this.sortConversations();
+                this.layout = this.conversations.length ? 'main' : this.layout;
                 this.port.postMessage({
                     type: 'subscribe',
                     topics: this.conversations.map(({ id }) => id)
@@ -137,6 +138,45 @@ $customerViewModel = $viewModels->require(Customer::class);
                 }
 
                 this.message = null;
+            },
+
+            async startNewConversation() {
+                this.isLoading = true;
+
+                const response = await fetch(`${BASE_URL}rest/${CURRENT_STORE_CODE}/V1/conversation/create`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                });
+
+                this.isLoading = false;
+
+                if (!response.ok) {
+                    console.error('Error creating new conversation');
+                    return;
+                }
+
+                const conversation = await response.json();
+                conversation.messages = [];
+                this.conversations.push(conversation);
+                this.sortConversations();
+                this.currentConversation = conversation;
+                this.layout = 'conversation';
+                this.port.postMessage({
+                    type: 'subscribe',
+                    topics: [conversation.id]
+                });
+            },
+
+            sortConversations() {
+                this.conversations.sort((a, b) => {
+                    const dateA = a.messages[0]?.created_at ?? a.created_at;
+                    const dateB = b.messages[0]?.created_at ?? b.created_at;
+
+                    return dateB.localeCompare(dateA);
+                });
             },
 
             isSendAllowed() {
@@ -190,7 +230,7 @@ $customerViewModel = $viewModels->require(Customer::class);
             },
 
             formatLastMessageDate(conversation) {
-                const date = conversation.messages.at(-1).created_at;
+                const date = conversation.messages.at(-1)?.created_at;
                 if (!date) {
                     return '';
                 }
@@ -213,6 +253,9 @@ $customerViewModel = $viewModels->require(Customer::class);
 
             formatConversationMessagePreview(conversation) {
                 const message = conversation.messages.at(-1);
+                if (!message) {
+                    return '<?= $escaper->escapeJs('No messages yet') ?>';
+                }
 
                 return hyva.str(
                     '%1: %2',
@@ -235,6 +278,7 @@ $customerViewModel = $viewModels->require(Customer::class);
 
                     this.conversations.find(({ id }) => id === conversationId)
                         ?.messages.push(data);
+                    this.sortConversations();
                 },
             },
 
@@ -242,15 +286,7 @@ $customerViewModel = $viewModels->require(Customer::class);
                 ['@private-content-loaded.window'](event) {
                     const { customer = {} } = event.detail.data;
                     this.customer = customer;
-                },
-
-                // ['@mercure:message.window'](event) {
-                //     const { type, data } = event.detail;
-                //
-                //     switch (type) {
-                //         case 'message:received': this.handleMessageUpdate(data)
-                //     }
-                // }
+                }
             },
         }
     }

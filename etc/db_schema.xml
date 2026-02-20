@@ -28,7 +28,6 @@
     <table name="livechat_conversations" engine="innodb" comment="Magento Asset Table">
         <column xsi:type="int" name="id" unsigned="true" identity="true" nullable="false" comment="Identifier" />
         <column xsi:type="int" name="user_id" unsigned="true" nullable="false" comment="User ID" />
-        <column xsi:type="int" name="admin_id" unsigned="true" nullable="true" comment="Admin ID" />
         <column xsi:type="datetime" name="created_at" default="CURRENT_TIMESTAMP" on_update="false" nullable="false" comment="Created At" />
 
         <constraint xsi:type="primary" referenceId="PRIMARY">
@@ -38,10 +37,6 @@
         <constraint xsi:type="foreign" referenceId="LIVECHAT_MESSAGES_USER_ID_CUSTOMER_ENTITY_ENTITY_ID"
                     table="livechat_messages" column="user_id"
                     referenceTable="customer_entity" referenceColumn="entity_id"
-                    onDelete="CASCADE" />
-        <constraint xsi:type="foreign" referenceId="LIVECHAT_MESSAGES_USER_ID_ADMIN_USER_USER_ID"
-                    table="livechat_messages" column="admin_id"
-                    referenceTable="admin_user" referenceColumn="user_id"
                     onDelete="CASCADE" />
     </table>
 </schema>
