@@ -4,7 +4,7 @@
 
     .livechat {
         @apply flex-grow shadow-lg flex flex-col min-h-0 rounded-lg bg-white;
-        @apply border-2 border-secondary;
+        @apply border-2 border-primary/30;
     }
 
     #livechat-trigger {
@@ -13,8 +13,8 @@
     }
 
     .livechat-header {
-        @apply w-full p-2 text-lg font-bold bg-white text-black text-center flex gap-3;
-        @apply bg-secondary;
+        @apply w-full p-2 text-lg font-bold text-black text-center flex gap-3;
+        @apply bg-primary/30 rounded-t-md;
     }
 
     .layout-main {
