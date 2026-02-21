@@ -50,6 +50,7 @@ jobs:
           module_name: MaxStan_LiveChat
           composer_name: max-stan/magento2-live-chat
           magento_version: '2.4.8'
+          magento_pre_install_script: './pre_project_script.sh'
         env:
-          INPUT_PRE_PROJECT_SCRIPT: './pre_project_script.sh'
-          API_KEY: ${{ secrets.HYVA_PACKAGIST_TOKEN }}
+          HYVA_PACKAGIST_TOKEN: ${{ secrets.HYVA_PACKAGIST_TOKEN }}
+
