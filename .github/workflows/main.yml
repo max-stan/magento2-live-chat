@@ -22,6 +22,9 @@ jobs:
       - uses: extdn/github-actions-m2/magento-phpstan/8.3@master
         with:
           composer_name: max-stan/magento2-live-chat
+          magento_pre_install_script: '.github/scripts/pre_project_script.sh'
+        env:
+          HYVA_PACKAGIST_TOKEN: ${{ secrets.HYVA_PACKAGIST_TOKEN }}
   integration-tests:
     name: Integration Tests
     runs-on: ubuntu-latest
@@ -50,7 +53,7 @@ jobs:
           module_name: MaxStan_LiveChat
           composer_name: max-stan/magento2-live-chat
           magento_version: '2.4.8'
-          magento_pre_install_script: '.github/workflows/pre_project_script.sh'
+          magento_pre_install_script: '.github/scripts/pre_project_script.sh'
         env:
           HYVA_PACKAGIST_TOKEN: ${{ secrets.HYVA_PACKAGIST_TOKEN }}
 
