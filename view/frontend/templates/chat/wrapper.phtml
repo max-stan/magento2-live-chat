@@ -49,6 +49,10 @@ $customerViewModel = $viewModels->require(Customer::class);
             message: null,
             currentConversation: null,
             conversations: null,
+            currentPage: 1,
+            hasMoreMessages: true,
+            isLoadingMore: false,
+            scrollObserver: null,
             conversationTitleDateFormatter: null,
             messageDateFormatter: null,
             lastMessageDateFormatter: null,
@@ -109,6 +113,66 @@ $customerViewModel = $viewModels->require(Customer::class);
                 this.port.start();
             },
 
+            openConversation(conversation) {
+                this.currentConversation = conversation;
+                this.currentPage = 1;
+                this.hasMoreMessages = conversation.messages.length >= 50;
+                this.layout = 'conversation';
+            },
+
+            async loadMoreMessages() {
+                if (this.isLoadingMore || !this.hasMoreMessages || !this.currentConversation) {
+                    return;
+                }
+
+                this.isLoadingMore = true;
+                const nextPage = this.currentPage + 1;
+
+                const response = await fetch(
+                    `${BASE_URL}rest/${CURRENT_STORE_CODE}/V1/conversation/${this.currentConversation.id}/messages/${nextPage}`,
+                    {
+                        method: 'GET',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    }
+                );
+
+                if (!response.ok) {
+                    this.isLoadingMore = false;
+                    console.error('Error loading more messages');
+                    return;
+                }
+
+                const messages = await response.json();
+                this.currentPage = nextPage;
+
+                if (messages.length < 50) {
+                    this.hasMoreMessages = false;
+                }
+
+                if (messages.length) {
+                    this.currentConversation.messages.unshift(...messages);
+                }
+
+                this.isLoadingMore = false;
+            },
+
+            initScrollObserver() {
+                this.scrollObserver?.disconnect();
+                this.scrollObserver = new IntersectionObserver(
+                    ([entry]) => {
+                        if (entry.isIntersecting) {
+                            this.loadMoreMessages();
+                        }
+                    },
+                    { root: this.$refs.scrollContainer }
+                );
+
+                this.scrollObserver.observe(this.$refs.scrollSentinel);
+            },
+
             async sendMessage() {
                 if (!this.message) {
                     return;
@@ -163,6 +227,8 @@ $customerViewModel = $viewModels->require(Customer::class);
                 this.conversations.push(conversation);
                 this.sortConversations();
                 this.currentConversation = conversation;
+                this.currentPage = 1;
+                this.hasMoreMessages = false;
                 this.layout = 'conversation';
                 this.port.postMessage({
                     type: 'subscribe',

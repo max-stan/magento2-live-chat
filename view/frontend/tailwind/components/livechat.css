@@ -41,6 +41,10 @@
         @apply rounded-bl-lg rounded-br-lg;
     }
 
+    .livechat-scroll-sentinel {
+        overflow-anchor: none;
+    }
+
     .layout-conversation {
         .livechat-body {
             @apply overflow-y-auto px-2.5 py-3.5 flex flex-col-reverse;
