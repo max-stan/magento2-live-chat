@@ -20,10 +20,7 @@ $heroicons = $viewModels->require(HeroiconsOutline::class);
     <button
         class="text-left hover:bg-gray-100 px-2.5 py-3.5 w-full"
         :aria-label="getConversationLabel(conversation)"
-        @click="
-            currentConversation = conversation;
-            layout = 'conversation';
-        "
+        @click="openConversation(conversation)"
     >
         <div class="flex justify-between gap-1">
             <span class="font-medium" x-html="formatConversationTitle(conversation.created_at)"></span>

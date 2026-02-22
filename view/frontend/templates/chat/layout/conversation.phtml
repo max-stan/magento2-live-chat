@@ -20,6 +20,7 @@ $heroicons = $viewModels->require(HeroiconsOutline::class);
             <button
                 aria-label="<?= $escaper->escapeHtmlAttr(__('Back to conversations')) ?>"
                 @click="
+                    scrollObserver?.disconnect();
                     layout = 'main';
                     currentConversation = null;
                 "
@@ -28,9 +29,18 @@ $heroicons = $viewModels->require(HeroiconsOutline::class);
             </button>
             <h2 id="livechat-title" x-html="formatConversationTitle(currentConversation.created_at)"></h2>
         </div>
-        <div class="livechat-body">
+        <div class="livechat-body" x-ref="scrollContainer" x-init="$nextTick(() => initScrollObserver())">
             <?php // Please don't delete ul tag to keep user always scolled bottom?>
             <ul x-ref="messagesContainer" role="log" aria-label="<?= $escaper->escapeHtmlAttr(__('Chat messages')) ?>">
+                <li x-ref="scrollSentinel" class="livechat-scroll-sentinel flex justify-center py-2" aria-live="polite">
+                    <template x-if="isLoadingMore">
+                        <svg class="animate-spin h-5 w-5 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                        </svg>
+                    </template>
+                    <span class="sr-only" x-show="isLoadingMore"><?= $escaper->escapeHtml(__('Loading older messages...')) ?></span>
+                </li>
                 <template x-for="(message, index) in currentConversation.messages" :key="message.id">
                         <?= /** @noEscape */ $block->getChildHtml('message-date') ?>
                     <?= /** @noEscape */ $block->getChildHtml('message') ?>
