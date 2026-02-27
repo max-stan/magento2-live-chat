@@ -7,6 +7,7 @@ use Hyva\Theme\ViewModel\HeroiconsOutline;
 use Magento\Authorization\Model\UserContextInterface;
 use Magento\Framework\Escaper;
 use Magento\Framework\View\Element\Template;
+use MaxStan\LiveChat\Api\Data\MessageInterface;
 
 /** @var Template $block */
 /** @var ViewModelRegistry $viewModels */
@@ -16,7 +17,7 @@ use Magento\Framework\View\Element\Template;
 $heroicons = $viewModels->require(HeroiconsOutline::class);
 $tooltip = $escaper->escapeHtml(__('Recipient have opened the chat/read the message'));
 ?>
-<li>
+<li :data-message-id="message.id">
     <template x-if="showDateSeparator(index)">
         <div class="livechat-date-wrapper">
             <time class="livechat-date" x-text="formatSeparatorDate(message.created_at)"></time>
@@ -52,7 +53,7 @@ $tooltip = $escaper->escapeHtml(__('Recipient have opened the chat/read the mess
                             <span class="sr-only"><?= $escaper->escapeHtml(__('Sent')) ?></span>
                         </span>
                     </template>
-                    <template x-if="message.status === 'read'">
+                    <template x-if="message.status === <?= MessageInterface::STATUS_READ ?>">
                         <span class="status flex">
                             <span aria-hidden="true" class="flex">
                                 <?= $heroicons->checkHtml('', 13, 13) ?>

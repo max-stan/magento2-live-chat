@@ -7,6 +7,8 @@ use Hyva\Theme\ViewModel\Customer;
 use Magento\Authorization\Model\UserContextInterface;
 use Magento\Framework\Escaper;
 use Magento\Framework\View\Element\Template;
+use MaxStan\LiveChat\Api\Data\MessageInterface;
+use MaxStan\LiveChat\Model\UserChatManagement;
 
 /** @var Template $block */
 /** @var ViewModelRegistry $viewModels */
@@ -116,7 +118,7 @@ $customerViewModel = $viewModels->require(Customer::class);
             openConversation(conversation) {
                 this.currentConversation = conversation;
                 this.currentPage = 1;
-                this.hasMoreMessages = conversation.messages.length >= 50;
+                this.hasMoreMessages = conversation.messages.length >= <?= $escaper->escapeJs(UserChatManagement::MESSAGES_LIMIT) ?>;
                 this.layout = 'conversation';
             },
 
@@ -148,7 +150,7 @@ $customerViewModel = $viewModels->require(Customer::class);
                 const messages = await response.json();
                 this.currentPage = nextPage;
 
-                if (messages.length < 50) {
+                if (messages.length < <?= $escaper->escapeJs(UserChatManagement::MESSAGES_LIMIT) ?>) {
                     this.hasMoreMessages = false;
                 }
 
@@ -162,15 +164,71 @@ $customerViewModel = $viewModels->require(Customer::class);
             initScrollObserver() {
                 this.scrollObserver?.disconnect();
                 this.scrollObserver = new IntersectionObserver(
-                    ([entry]) => {
-                        if (entry.isIntersecting) {
-                            this.loadMoreMessages();
+                    (entries) => {
+                        for (const entry of entries) {
+                            if (!entry.isIntersecting) continue;
+
+                            if (entry.target === this.$refs.scrollSentinel) {
+                                this.loadMoreMessages();
+                            } else if (entry.target.dataset.messageId) {
+                                this.scrollObserver.unobserve(entry.target);
+                                this.markAllAsRead();
+                            }
                         }
                     },
                     { root: this.$refs.scrollContainer }
                 );
 
                 this.scrollObserver.observe(this.$refs.scrollSentinel);
+                this.observeUnreadMessages();
+            },
+
+            observeUnreadMessages() {
+                if (!this.currentConversation?.messages.length) return;
+
+                this.$nextTick(() => {
+                    const container = this.$refs.messagesContainer;
+                    if (!container) return;
+
+                    const unread = this.currentConversation.messages.findLast(
+                        (m) => m.sender_type !== <?= $escaper->escapeHtml(UserContextInterface::USER_TYPE_CUSTOMER) ?>
+                            && m.status !== <?= MessageInterface::STATUS_READ ?>
+                    );
+
+                    if (!unread) return;
+
+                    const el = container.querySelector(`[data-message-id="${unread.id}"]`);
+                    if (el) this.scrollObserver.observe(el);
+                });
+            },
+
+            async markAllAsRead() {
+                const lastMessage = this.currentConversation?.messages.at(-1);
+                if (!lastMessage) return;
+
+                const lastReadMessageId = lastMessage.id;
+
+                this.currentConversation.messages.forEach((message) => {
+                    if (message.sender_type !== <?= $escaper->escapeHtml(UserContextInterface::USER_TYPE_CUSTOMER) ?>) {
+                        message.status = <?= MessageInterface::STATUS_READ ?>;
+                    }
+                });
+
+                const response = await fetch(
+                    `${BASE_URL}rest/${CURRENT_STORE_CODE}/V1/conversation/${this.currentConversation.id}/messages/read`,
+                    {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest'
+                        },
+                        body: JSON.stringify({ lastReadMessageId })
+                    }
+                );
+
+                if (!response.ok) {
+                    console.error('Error marking messages as read');
+                }
             },
 
             async sendMessage() {
@@ -345,6 +403,17 @@ $customerViewModel = $viewModels->require(Customer::class);
                     this.conversations.find(({ id }) => id === conversationId)
                         ?.messages.push(data);
                     this.sortConversations();
+                    this.observeUnreadMessages();
+                },
+                ['messages:read'](data) {
+                    const lastId = data.last_read_message_id;
+                    if (!lastId || !this.currentConversation) return;
+
+                    this.currentConversation.messages.forEach((message) => {
+                        if (message.id <= lastId) {
+                            message.status = <?= MessageInterface::STATUS_READ ?>;
+                        }
+                    });
                 },
             },
 

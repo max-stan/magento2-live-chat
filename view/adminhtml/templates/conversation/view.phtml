@@ -25,7 +25,8 @@ $conversationId = (int)$block->getRequest()->getParam('id');
                     "conversationId": <?= $conversationId ?>,
                     "mercureUrl": "<?= $escaper->escapeUrl($block->getBaseUrl()) ?>.well-known/mercure",
                     "messagesUrl": "<?= $escaper->escapeUrl($block->getUrl('livechat/conversation/messages')) ?>",
-                    "sendMessageUrl": "<?= $escaper->escapeUrl($block->getUrl('livechat/conversation/sendMessage')) ?>"
+                    "sendMessageUrl": "<?= $escaper->escapeUrl($block->getUrl('livechat/conversation/sendMessage')) ?>",
+                    "markAsReadUrl": "<?= $escaper->escapeUrl($block->getUrl('livechat/conversation/markAsRead')) ?>"
                 }
             }
         }

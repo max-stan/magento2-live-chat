@@ -11,6 +11,7 @@ define([
             mercureUrl: '',
             messagesUrl: '',
             sendMessageUrl: '',
+            markAsReadUrl: '',
             messages: [],
             messageText: '',
             isLoading: false,
@@ -33,7 +34,7 @@ define([
         },
 
         loadMessages: function () {
-            const self = this;
+            let self = this;
             this.isLoading = true;
 
             $.ajax({
@@ -45,13 +46,14 @@ define([
             }).done(function (data) {
                 self.messages = data;
                 self.scrollToBottom();
+                self.markAllAsRead();
             }).always(function () {
                 self.isLoading = false;
             });
         },
 
         sendMessage: function () {
-            const self = this,
+            let self = this,
                 text = this.messageText.trim();
 
             if (!text || this.isSending) {
@@ -75,20 +77,25 @@ define([
         },
 
         connectMercure: function () {
-            const self = this,
+            let self = this,
                 url = new URL(this.mercureUrl),
                 topic = 'conversation_index_index_' + this.conversationId;
 
             url.searchParams.append('topic', topic);
 
-            var eventSource = new EventSource(url.toString(), { withCredentials: true });
+            let eventSource = new EventSource(url.toString(), { withCredentials: true });
 
             eventSource.onmessage = function (event) {
-                var payload = JSON.parse(event.data);
+                let payload = JSON.parse(event.data);
 
                 if (payload.type === 'message:received') {
                     self.messages.push(payload.data);
                     self.scrollToBottom();
+                    self.markAllAsRead();
+                }
+
+                if (payload.type === 'messages:read') {
+                    self.onMessagesRead(payload.data.last_read_message_id);
                 }
             };
 
@@ -97,9 +104,51 @@ define([
             };
         },
 
+        markAllAsRead: function () {
+            let messages = this.messages,
+                lastMessage;
+
+            if (!messages.length || !this.markAsReadUrl) {
+                return;
+            }
+
+            lastMessage = messages[messages.length - 1];
+
+            $.ajax({
+                url: this.markAsReadUrl,
+                type: 'POST',
+                data: {
+                    id: this.conversationId,
+                    lastReadMessageId: lastMessage.id,
+                    form_key: window.FORM_KEY
+                },
+                dataType: 'json',
+                showLoader: false
+            });
+        },
+
+        onMessagesRead: function (lastReadMessageId) {
+            let messages = this.messages,
+                updated = false,
+                i, message;
+
+            for (i = 0; i < messages.length; i++) {
+                message = messages[i];
+
+                if (parseInt(message.id, 10) <= lastReadMessageId && parseInt(message.status, 10) !== 1) {
+                    message.status = 1;
+                    updated = true;
+                }
+            }
+
+            if (updated) {
+                this.messages = messages.slice();
+            }
+        },
+
         scrollToBottom: function () {
             setTimeout(function () {
-                var container = document.getElementById('livechat-messages');
+                let container = document.getElementById('livechat-messages');
 
                 if (container) {
                     container.scrollTop = container.scrollHeight;
@@ -108,14 +157,14 @@ define([
         },
 
         showDateSeparator: function (index) {
-            const messages = this.messages,
+            let messages = this.messages,
                 current = new Date(messages[index].created_at + ' UTC').toDateString();
 
             if (index === 0) {
                 return true;
             }
 
-            const previous = new Date(messages[index - 1].created_at + ' UTC').toDateString();
+            let previous = new Date(messages[index - 1].created_at + ' UTC').toDateString();
 
             return current !== previous;
         },
@@ -125,7 +174,7 @@ define([
                 return '';
             }
 
-            var date = new Date(dateStr + ' UTC');
+            let date = new Date(dateStr + ' UTC');
 
             return date.toLocaleDateString('en-US', {
                 month: 'long',
@@ -138,7 +187,7 @@ define([
                 return '';
             }
 
-            var date = new Date(dateStr + ' UTC');
+            let date = new Date(dateStr + ' UTC');
 
             return date.toLocaleString('en-US', {
                 hour: 'numeric',
@@ -153,7 +202,7 @@ define([
         },
 
         isRead: function (message) {
-            return message.status === 'read';
+            return parseInt(message.status, 10) === 1;
         },
 
         handleKeydown: function (data, event) {

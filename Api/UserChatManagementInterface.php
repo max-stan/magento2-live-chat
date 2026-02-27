@@ -48,6 +48,16 @@ interface UserChatManagementInterface
     public function getConversations(): array;
 
     /**
+     * @param int $conversationId
+     * @param int $lastReadMessageId
+     * @return bool
+     *
+     * @throws AuthorizationException
+     * @throws NoSuchEntityException
+     */
+    public function markAsRead(int $conversationId, int $lastReadMessageId): bool;
+
+    /**
      * @return \MaxStan\LiveChat\Api\Data\PublicConversationInterface
      *
      * @throws LocalizedException

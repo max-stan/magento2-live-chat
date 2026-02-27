@@ -18,6 +18,7 @@ use Magento\User\Model\UserFactory as AdminUserFactory;
 use MaxStan\LiveChat\Api\ConversationRepositoryInterface;
 use MaxStan\LiveChat\Api\Data\ConversationInterface;
 use MaxStan\LiveChat\Api\Data\MessageInterface;
+use MaxStan\LiveChat\Model\ResourceModel\Message as MessageResource;
 use MaxStan\LiveChat\Api\Data\ConversationInterfaceFactory;
 use MaxStan\LiveChat\Api\Data\MessageInterfaceFactory;
 use MaxStan\LiveChat\Api\MessageRepositoryInterface;
@@ -43,7 +44,8 @@ readonly class UserChatManagement implements UserChatManagementInterface
         private AdminUserFactory $adminUserFactory,
         private AdminUserResource $adminUserResource,
         private MercureTopicPublisher $mercureTopicPublisher,
-        private MercureHubInterface $mercureHub
+        private MercureHubInterface $mercureHub,
+        private MessageResource $messageResource
     ) {
     }
 
@@ -193,6 +195,34 @@ readonly class UserChatManagement implements UserChatManagementInterface
         $this->mercureHub->setAuthorizationHeader();
 
         return $conversation;
+    }
+
+    /**
+     * @inheritDoc
+     * @throws LocalizedException
+     */
+    public function markAsRead(int $conversationId, int $lastReadMessageId): bool
+    {
+        $this->checkAuthorization($conversationId);
+
+        $connection = $this->messageResource->getConnection();
+        $connection->update(
+            $this->messageResource->getMainTable(),
+            [MessageInterface::STATUS => MessageInterface::STATUS_READ],
+            [
+                'id <= ?' => $lastReadMessageId,
+                MessageInterface::CONVERSATION_ID . ' = ?' => $conversationId,
+                MessageInterface::SENDER_ID . ' != ?' => $this->getUserId(),
+                MessageInterface::STATUS . ' != ?' => MessageInterface::STATUS_READ,
+            ]
+        );
+
+        $this->mercureTopicPublisher->execute(
+            ConversationMessageResolver::IRI . "_$conversationId",
+            ['type' => 'messages:read', 'data' => ['last_read_message_id' => $lastReadMessageId]]
+        );
+
+        return true;
     }
 
     private function getCustomerName(int $customerId): string

@@ -10,6 +10,8 @@ interface MessageInterface
     public const string CONVERSATION_ID = "conversation_id";
     public const string TEXT = "text";
     public const string STATUS = "status";
+    public const int STATUS_UNREAD = 0;
+    public const int STATUS_READ = 1;
     public const string CREATED_AT = "created_at";
 
     /**

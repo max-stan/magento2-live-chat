@@ -19,6 +19,12 @@
             <resource ref="self" />
         </resources>
     </route>
+    <route url="/V1/conversation/:conversationId/messages/read" method="PUT">
+        <service class="MaxStan\LiveChat\Api\UserChatManagementInterface" method="markAsRead" />
+        <resources>
+            <resource ref="self" />
+        </resources>
+    </route>
     <route url="/V1/conversation/create" method="POST">
         <service class="MaxStan\LiveChat\Api\UserChatManagementInterface" method="createConversation" />
         <resources>
