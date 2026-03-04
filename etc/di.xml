@@ -18,10 +18,18 @@
     <preference for="MaxStan\LiveChat\Api\Data\MessageSearchResultsInterface"
                 type="MaxStan\LiveChat\Model\MessageSearchResults" />
 
-    <type name="MaxStan\Mercure\Service\MercureTopicResolver">
+    <type name="MaxStan\Mercure\Service\MercurePublishTopicsProvider">
         <arguments>
             <argument name="providers" xsi:type="array">
-                <item name="conversation" xsi:type="object">MaxStan\LiveChat\Model\Topic\ConversationProvider</item>
+                <item name="livechat" xsi:type="object">MaxStan\LiveChat\Model\Topic\LiveChatTopicResolver</item>
+            </argument>
+        </arguments>
+    </type>
+
+    <type name="MaxStan\Mercure\Service\MercureSubscribeTopicsProvider">
+        <arguments>
+            <argument name="providers" xsi:type="array">
+                <item name="livechat" xsi:type="object">MaxStan\LiveChat\Model\Topic\LiveChatTopicResolver</item>
             </argument>
         </arguments>
     </type>

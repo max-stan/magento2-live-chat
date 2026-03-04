@@ -19,7 +19,6 @@ use MaxStan\LiveChat\Api\Data\MessageInterface;
 use MaxStan\LiveChat\Api\Data\MessageInterfaceFactory;
 use MaxStan\LiveChat\Api\MessageRepositoryInterface;
 use MaxStan\LiveChat\Api\MessagesManagerInterface;
-use MaxStan\LiveChat\Model\CustomerUid;
 use MaxStan\LiveChat\Model\Message;
 use MaxStan\LiveChat\Model\ResourceModel\Message as MessageResource;
 use MaxStan\Mercure\Api\MercurePublisherInterface;
@@ -39,7 +38,6 @@ readonly class MessagesManager implements MessagesManagerInterface
         private AdminUserFactory $adminUserFactory,
         private AdminUserResource $adminUserResource,
         private Iri $iri,
-        private CustomerUid $customerUid,
         private MessageResource $messageResource
     ) {
     }
@@ -77,7 +75,7 @@ readonly class MessagesManager implements MessagesManagerInterface
         $message->setData('sender_name', $userName)
             ->setData('sender_type', $this->userContext->getUserType());
 
-        $conversationCreatorUserId = $this->customerUid->get($conversation->getUserId());
+        $conversationCreatorUserId = $conversation->getUserId();
         $this->mercurePublisher->publish(
             $this->iri->get("livechat/$conversationCreatorUserId"),
             $message->getData(),
@@ -131,7 +129,7 @@ readonly class MessagesManager implements MessagesManagerInterface
         $conversation = $this->authorization->isAllowed($conversationId);
         $this->messageResource->updateStatusBulk($messageIds, MessageInterface::STATUS_READ);
 
-        $conversationCreatorUserId = $this->customerUid->get($conversation->getUserId());
+        $conversationCreatorUserId = $conversation->getUserId();
         $this->mercurePublisher->publish(
             $this->iri->get("livechat/$conversationCreatorUserId"),
             [

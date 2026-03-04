@@ -58,10 +58,10 @@
 
             <block name="livechat.scripts.main"
                    class="Magento\Framework\View\Element\Template"
-                   template="MaxStan_LiveChat::chat/main-script.phtml" />
+                   template="MaxStan_LiveChat::chat/scripts/main.phtml" />
             <block name="livechat.wrapper.permissions-bar"
                    class="Magento\Framework\View\Element\Template"
-                   template="MaxStan_LiveChat::chat/permissions-bar-script.phtml" />
+                   template="MaxStan_LiveChat::chat/scripts/permissions-bar.phtml" />
         </referenceContainer>
     </body>
 </page>

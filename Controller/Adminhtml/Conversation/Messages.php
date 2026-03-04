@@ -11,6 +11,7 @@ use Magento\Framework\Controller\Result\Json;
 use Magento\Framework\Controller\Result\JsonFactory;
 use MaxStan\LiveChat\Api\MessagesManagerInterface;
 use MaxStan\LiveChat\Model\Message;
+use MaxStan\Mercure\Api\MercureHttpManagementInterface;
 
 class Messages extends Action implements HttpGetActionInterface
 {
@@ -19,7 +20,8 @@ class Messages extends Action implements HttpGetActionInterface
     public function __construct(
         Context $context,
         private readonly JsonFactory $jsonFactory,
-        private readonly MessagesManagerInterface $chatManagement
+        private readonly MessagesManagerInterface $chatManagement,
+        private readonly MercureHttpManagementInterface $mercureHttpManagement
     ) {
         parent::__construct($context);
     }
@@ -35,6 +37,7 @@ class Messages extends Action implements HttpGetActionInterface
             $messages = $this->chatManagement->get($conversationId, $currentPage);
             $data = array_map(fn ($message) => $message->getData(), $messages);
             $result->setData($data);
+            $this->mercureHttpManagement->attachAuthorizationCookie();
         } catch (Exception $e) {
             $result->setHttpResponseCode(400);
             $result->setData(['error' => true, 'message' => $e->getMessage()]);

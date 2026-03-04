@@ -6,8 +6,6 @@ namespace MaxStan\LiveChat\Plugin;
 
 use Magento\Authorization\Model\UserContextInterface;
 use Magento\Customer\CustomerData\Customer;
-use Magento\Customer\Helper\Session\CurrentCustomer;
-use MaxStan\LiveChat\Model\CustomerUid;
 
 /**
  * Adds customer entity ID to the customer section data for LiveChat topic subscription.
@@ -15,8 +13,7 @@ use MaxStan\LiveChat\Model\CustomerUid;
 class AddCustomerIdToSectionData
 {
     public function __construct(
-        private readonly UserContextInterface $userContext,
-        private readonly CustomerUid $customerUid
+        private readonly UserContextInterface $userContext
     ) {
     }
 
@@ -25,7 +22,7 @@ class AddCustomerIdToSectionData
         $customerId = $this->userContext->getUserId();
 
         if ($customerId) {
-            $result['uid'] = $this->customerUid->get($customerId);
+            $result['uid'] = $customerId;
         }
 
         return $result;

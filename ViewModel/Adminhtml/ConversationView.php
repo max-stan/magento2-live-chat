@@ -8,14 +8,12 @@ use Magento\Framework\App\RequestInterface;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Framework\View\Element\Block\ArgumentInterface;
 use MaxStan\LiveChat\Api\ConversationRepositoryInterface;
-use MaxStan\LiveChat\Model\CustomerUid;
 use MaxStan\Mercure\Model\Iri;
 
 readonly class ConversationView implements ArgumentInterface
 {
     public function __construct(
         private ConversationRepositoryInterface $conversationRepository,
-        private CustomerUid $customerUid,
         private RequestInterface $request,
         private Iri $iri
     ) {
@@ -31,8 +29,8 @@ readonly class ConversationView implements ArgumentInterface
         try {
             $conversation = $this->conversationRepository->getById($this->getConversationId());
 
-            $uid = $this->customerUid->get($conversation->getUserId());
-            return $this->iri->get("livechat/$uid");
+            $userId = $conversation->getUserId();
+            return $this->iri->get("livechat/$userId");
         } catch (NoSuchEntityException) {
             return '';
         }

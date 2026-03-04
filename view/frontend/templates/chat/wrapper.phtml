@@ -11,24 +11,27 @@ use Magento\Framework\View\Element\Template;
 /** @var Escaper $escaper */
 ?>
 <div
-    class="livechat-wrapper"
+    class="z-30"
     x-data="initLiveChat()"
     x-bind="eventListeners"
-    :class="{ 'w-auto! h-auto!': !open }"
     @keyup.escape="open = false"
     @click.outside="open = false"
 >
     <?= /** @noEscape */ $block->getChildHtml('button') ?>
 
     <div
+        class="livechat-wrapper"
         x-show="open"
         x-cloak
-        class="livechat"
-        :class='{ ["layout-" + layout]: true }'
         x-transition
         role="dialog"
         aria-labelledby="livechat-title"
     >
-        <?= /** @noEscape */ $block->getChildHtml('layout') ?>
+        <div
+            class="livechat"
+            :class='{ ["layout-" + layout]: true }'
+        >
+            <?= /** @noEscape */ $block->getChildHtml('layout') ?>
+        </div>
     </div>
 </div>

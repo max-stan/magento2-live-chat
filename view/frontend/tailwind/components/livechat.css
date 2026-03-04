@@ -1,21 +1,27 @@
+#livechat-trigger {
+    /* order-last allows us to focus on the "Chat" button when we close popup using Esc key */
+    @apply fixed bottom-3 right-3 md:bottom-5 md:right-5;
+    @apply btn btn-primary p-3 rounded-xl w-fit self-end shadow-lg order-last;
+    @apply z-10 rounded-lg;
+
+    .unread {
+        @apply absolute top-0 right-0 -translate-y-1/2 translate-x-1/2;
+        @apply rounded-full bg-red-500 flex items-center justify-center;
+        @apply text-xs text-white leading-6;
+        width: 27px;
+        height: 26px;
+    }
+}
+
 .livechat-wrapper {
-    @apply fixed bottom-5 right-5 flex flex-col justify-end gap-3;
-    @apply max-w-sm max-h-[calc(100%-2.5rem)] h-[600px] w-full z-10 rounded-lg;
+    @apply fixed w-full max-w-sm max-h-[524px] z-10 rounded-lg;
+    @apply bottom-22 right-3 md:bottom-24 md:right-5;
+    height: calc(100% - 96px);
+    width: calc(100% - 24px);
 
     .livechat {
-        @apply flex-grow shadow-lg flex flex-col min-h-0 rounded-lg bg-white;
+        @apply flex-grow shadow-lg flex flex-col h-full rounded-lg bg-white;
         @apply border-2 border-primary/30;
-    }
-
-    #livechat-trigger {
-        /* order-last allows us to focus on the "Chat" button when we close popup using Esc key */
-        @apply relative btn btn-primary p-3 rounded-xl w-fit self-end shadow-lg order-last;
-
-        .unread {
-            @apply absolute top-0 right-0 -translate-y-1/2 translate-x-1/2;
-            @apply rounded-full bg-red-500 w-[27px] h-[26px] flex items-center justify-center;
-            @apply text-xs text-white leading-6;
-        }
     }
 
     .livechat-header {

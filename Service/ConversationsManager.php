@@ -17,7 +17,6 @@ use MaxStan\LiveChat\Api\Data\ConversationInterfaceFactory;
 use MaxStan\LiveChat\Api\Data\MessageInterface;
 use MaxStan\LiveChat\Api\MessagesManagerInterface;
 use MaxStan\LiveChat\Model\Conversation;
-use MaxStan\LiveChat\Model\CustomerUid;
 use MaxStan\LiveChat\Model\ResourceModel\Message\Collection;
 use MaxStan\LiveChat\Model\ResourceModel\Message\CollectionFactory;
 use MaxStan\Mercure\Api\MercureHttpManagementInterface;
@@ -35,7 +34,6 @@ readonly class ConversationsManager implements ConversationsManagerInterface
         private MercureHttpManagementInterface $mercureHttpManagement,
         private MercurePublisherInterface $mercurePublisher,
         private Iri $iri,
-        private CustomerUid $customerUid,
         private CollectionFactory $collectionFactory
     ) {
     }
@@ -98,7 +96,7 @@ readonly class ConversationsManager implements ConversationsManagerInterface
         }
 
         $conversation->setData('messages', []);
-        $topic = $this->iri->get("livechat/" . $this->customerUid->get($userId));
+        $topic = $this->iri->get("livechat/$userId");
         $this->mercurePublisher->publish($topic, $conversation->getData(), 'conversation:create');
         $this->mercureHttpManagement->attach();
 
