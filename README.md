@@ -25,6 +25,9 @@ administrators — all without page reloads, using server-sent events via Mercur
 To install Mercure in your Magento 2 project, follow these steps:
 
 ```shell
+# Set minimum stability to allow alpha version
+composer config minimum-stability "alpha"
+# Standard module installation
 composer require max-stan/magento2-live-chat
 bin/magento module:enable MaxStan_LiveChat
 bin/magento setup:upgrade
